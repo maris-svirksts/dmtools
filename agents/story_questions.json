@@ -17,11 +17,12 @@
         "Question description needs to be in Jira Markdown format",
         "Content from the response.md file will be parsed via JSON Parser, it must be valid JSONArray. Based on that will be created jira tickets by script. You must follow format from formattingRules and fewShots.",
         "Allowed priorities 'Highest', 'High', 'Medium', 'Low', 'Lowest'",
-        "If you don't have questions, or all needed questions are created already and everything is crystal clear just write empty array [] to the outputs/response.md",
+        "Always return at least one question in the JSON array.",
+        "If requirements appear clear, add one risk-validation question about assumptions, edge cases, or acceptance criteria.",
         "You must investigate codebase to understand current functionality regarding the topic to avoid stupid questions."
       ],
       "knownInfo" : "",
-      "formattingRules" : "Response must be a valid JSON array. Each item must be a JSON object with keys: \"summary\" (string, <=120 chars), \"priority\" (one of 'Highest', 'High', 'Medium', 'Low', 'Lowest'), and \"description\" (string in Jira Markdown). Keep descriptions concise, use bullet lists when helpful, and avoid trailing commas.",
+      "formattingRules" : "Response must be a valid JSON array with at least 1 item. Each item must be a JSON object with keys: \"summary\" (string, <=120 chars), \"priority\" (one of 'Highest', 'High', 'Medium', 'Low', 'Lowest'), and \"description\" (string in Jira Markdown). Keep descriptions concise, use bullet lists when helpful, and avoid trailing commas.",
       "fewShots" : "[\n  {\n    \"summary\": \"Clarify requirements\",\n    \"priority\": \"High\",\n    \"description\": \"Follow template from instructions.\"\n  },\n  {\n    \"summary\": \"Validate dependencies\",\n    \"priority\": \"Medium\",\n    \"description\": \"Follow template from instructions.\"\n  }\n]"
     },
     "cliCommands" : [
