@@ -26,8 +26,15 @@ if [ $# -lt 1 ]; then
   exit 1
 fi
 
-if ! command -v cursor-agent >/dev/null 2>&1; then
-  echo "Error: cursor-agent not found in PATH" >&2
+CURSOR_AGENT_BIN=""
+if command -v cursor-agent >/dev/null 2>&1; then
+  CURSOR_AGENT_BIN="$(command -v cursor-agent)"
+elif [ -x "$HOME/.local/bin/cursor-agent" ]; then
+  CURSOR_AGENT_BIN="$HOME/.local/bin/cursor-agent"
+fi
+
+if [ -z "$CURSOR_AGENT_BIN" ]; then
+  echo "Error: cursor-agent not found in PATH or at $HOME/.local/bin/cursor-agent" >&2
   exit 127
 fi
 
@@ -48,18 +55,56 @@ fi
 
 # Build command with defaults if no options provided
 if [ ${#PASS_ARGS[@]} -eq 0 ]; then
-  CMD=(cursor-agent --force --print --model auto --output-format=text "$PROMPT")
+  CMD=("$CURSOR_AGENT_BIN" --force --print --model auto --output-format=text "$PROMPT")
 else
-  CMD=(cursor-agent "${PASS_ARGS[@]}" --output-format=text "$PROMPT")
+  CMD=("$CURSOR_AGENT_BIN" "${PASS_ARGS[@]}" --output-format=text "$PROMPT")
 fi
 
 echo "Running: ${CMD[*]}"
 echo ""
 
-# Execute cursor-agent directly
-"${CMD[@]}"
+# DMTools expects outputs/response.md to exist after CLI execution.
+mkdir -p outputs
+tmp_log="$(mktemp)"
+set +e
+# Auto-confirm interactive prompts to keep DMTools runs non-interactive.
+yes | "${CMD[@]}" | tee "$tmp_log"
+exit_code=${PIPESTATUS[1]}
+set -e
 
-exit_code=$?
+# Prefer agent-authored outputs/response.md; if missing/invalid, extract JSON array from CLI output.
+if [ ! -s outputs/response.md ] || ! jq -e . outputs/response.md >/dev/null 2>&1; then
+  if python3 - "$tmp_log" > outputs/response.md <<'PY'
+import json
+import re
+import sys
+
+text = open(sys.argv[1], 'r', encoding='utf-8', errors='ignore').read()
+best = None
+for m in re.finditer(r'\[[\s\S]*?\]', text):
+    s = m.group(0)
+    try:
+        obj = json.loads(s)
+        if isinstance(obj, list):
+            best = obj
+    except Exception:
+        pass
+
+if best is None:
+    sys.exit(1)
+
+json.dump(best, sys.stdout, ensure_ascii=False, indent=2)
+sys.stdout.write('\n')
+PY
+  then
+    echo "Recovered JSON array to outputs/response.md from CLI output"
+  else
+    echo "[]" > outputs/response.md
+    echo "Warning: Could not extract valid JSON array from CLI output; wrote [] to outputs/response.md" >&2
+  fi
+fi
+
+rm -f "$tmp_log"
 
 echo ""
 echo "=== Cursor Agent completed with exit code: $exit_code ==="
