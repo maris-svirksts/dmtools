@@ -16,6 +16,7 @@ Error: Java 23 or higher is required. Current version: 11
    # Re-run installer, it will install Java automatically
    curl -fsSL https://raw.githubusercontent.com/IstiN/dmtools/main/install.sh | bash
    ```
+   You can override the installer URL with `DMTOOLS_INSTALL_URL` if you use a fork.
 
 2. **Manual Java installation:**
    ```bash
@@ -334,6 +335,7 @@ rm -rf ~/.java/
 
 # 4. Reinstall
 curl -fsSL https://raw.githubusercontent.com/IstiN/dmtools/main/install.sh | bash
+# Optional: set DMTOOLS_INSTALL_URL to use a custom install script URL.
 
 # 5. Reload shell
 exec $SHELL

@@ -15,6 +15,8 @@ This script will:
 4. ✅ Create the `dmtools` command alias
 5. ✅ Set up shell integration (bash/zsh)
 
+You can override the installer URL with `DMTOOLS_INSTALL_URL` if you maintain a fork.
+
 **⚠️ IMPORTANT**: After installation, you **must** configure `dmtools.env` file. See [Configuration Setup](#-configuration-setup) below.
 
 ## 📦 Installation Methods
@@ -28,6 +30,7 @@ curl -fsSL https://raw.githubusercontent.com/IstiN/dmtools/main/install.sh | bas
 # Specific version
 DMTOOLS_VERSION=1.2.3 curl -fsSL https://raw.githubusercontent.com/IstiN/dmtools/main/install.sh | bash
 ```
+Set `DMTOOLS_INSTALL_URL` to use a custom install script URL (e.g. fork or branch).
 
 ### Method 2: Local Development Installation
 

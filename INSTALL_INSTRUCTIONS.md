@@ -84,6 +84,8 @@ curl -fsSL https://raw.githubusercontent.com/IstiN/dmtools/main/install.sh | bas
 DMTOOLS_VERSION=v1.7.126 curl -fsSL https://raw.githubusercontent.com/IstiN/dmtools/main/install.sh | bash
 ```
 
+**Advanced - Override install script URL:** Set `DMTOOLS_INSTALL_URL` to use a custom URL (e.g. a fork or branch). When unset, the default official URL is used. Example: `export DMTOOLS_INSTALL_URL=https://raw.githubusercontent.com/YOUR_FORK/dmtools/main/install.sh` then run your preferred install command, or use: `curl -fsSL "${DMTOOLS_INSTALL_URL:-https://raw.githubusercontent.com/IstiN/dmtools/main/install.sh}" | bash`.
+
 ### Windows (cmd.exe)
 
 **Version-pinned via raw.githubusercontent (recommended, faster, no breaking changes):**
@@ -104,6 +106,26 @@ Invoke-RestMethod -Uri "https://raw.githubusercontent.com/IstiN/dmtools/v1.7.126
 ```
 
 **Important**: If you don't specify a version, the installer will download the **latest** release.
+
+## CI/CD (Optional Version Pinning)
+
+Use `DMTOOLS_VERSION` in CI only when you need a pinned release for reproducible runs.
+
+```yaml
+- name: Install DMTools CLI
+  env:
+    DMTOOLS_INSTALL_URL: ${{ vars.DMTOOLS_INSTALL_URL }} # optional custom installer URL
+    DMTOOLS_VERSION: ${{ vars.DMTOOLS_VERSION }}         # optional, e.g. v1.7.126
+  run: |
+    if [ -n "${DMTOOLS_VERSION:-}" ]; then
+      curl -fsSL "${DMTOOLS_INSTALL_URL:-https://github.com/IstiN/dmtools/releases/latest/download/install.sh}" | bash -s -- "${DMTOOLS_VERSION}"
+    else
+      curl -fsSL "${DMTOOLS_INSTALL_URL:-https://github.com/IstiN/dmtools/releases/latest/download/install.sh}" | bash
+    fi
+```
+
+- If `DMTOOLS_VERSION` is set, that version is installed.
+- If `DMTOOLS_VERSION` is not set, installer defaults to **latest**.
 
 ---
 

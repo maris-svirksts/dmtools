@@ -42,6 +42,7 @@ JAVA_CMD=$(find_java_command 2>/dev/null) || {
     echo "Error: Java 23 is required but not found." >&2
     echo "Please install DMTools first:" >&2
     echo "  curl -fsSL https://raw.githubusercontent.com/IstiN/dmtools/main/install.sh | bash" >&2
+    echo "  (Advanced) Set DMTOOLS_INSTALL_URL to override the installer URL if needed." >&2
     exit 1
 }
 
@@ -192,6 +193,7 @@ usage() {
     if [ -z "$JAR_FILE" ] || [ ! -f "$JAR_FILE" ]; then
         error "DMTools JAR file not found. Please install DMTools first:
   curl -fsSL https://raw.githubusercontent.com/IstiN/dmtools/main/install.sh | bash
+  (Advanced) Set DMTOOLS_INSTALL_URL to override the installer URL if needed.
 
 Or if you're developing locally, build the project first:
   ./gradlew build
@@ -310,6 +312,7 @@ esac
 if [ -z "$JAR_FILE" ] || [ ! -f "$JAR_FILE" ]; then
     error "DMTools JAR file not found. Please install DMTools first:
   curl -fsSL https://raw.githubusercontent.com/IstiN/dmtools/main/install.sh | bash
+  (Advanced) Set DMTOOLS_INSTALL_URL to override the installer URL if needed.
 
 Or if you're developing locally, build the project first:
   ./gradlew build

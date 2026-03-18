@@ -15,7 +15,7 @@ dmtools-example:
     - apt-get update -qq && apt-get install -y curl
     - |
       if [ ! -f "$HOME/.dmtools/dmtools.jar" ]; then
-        curl https://github.com/IstiN/dmtools/releases/latest/download/install.sh -fsS | bash
+        curl "${DMTOOLS_INSTALL_URL:-https://github.com/IstiN/dmtools/releases/latest/download/install.sh}" -fsS | bash
       fi
     - export PATH="$HOME/.dmtools/bin:$PATH"
 

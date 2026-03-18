@@ -28,6 +28,8 @@ curl -fsSL https://raw.githubusercontent.com/IstiN/dmtools/v1.7.126/install.sh |
 set DMTOOLS_VERSION=v1.7.126 && curl -fsSL https://raw.githubusercontent.com/IstiN/dmtools/v1.7.126/install.bat -o "%TEMP%\dmtools-install.bat" && "%TEMP%\dmtools-install.bat"
 ```
 
+**Advanced:** Set `DMTOOLS_INSTALL_URL` to override the install script URL (e.g. fork or custom branch). When unset, the default URL above is used.
+
 This will:
 - ✅ Download the latest DMTools JAR (~50MB)
 - ✅ Install the `dmtools` command to `~/.dmtools/bin/`

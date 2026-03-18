@@ -707,7 +707,7 @@ jobs:
 
           **macOS / Linux / Git Bash:**
           \`\`\`bash
-          curl -fsSL https://raw.githubusercontent.com/IstiN/dmtools/${{ github.event.inputs.release_tag }}/install.sh | bash -s ${{ github.event.inputs.release_tag }}
+          curl -fsSL "${DMTOOLS_INSTALL_URL:-https://raw.githubusercontent.com/IstiN/dmtools/${{ github.event.inputs.release_tag }}/install.sh}" | bash -s ${{ github.event.inputs.release_tag }}
           \`\`\`
 
           **Windows (cmd.exe):**

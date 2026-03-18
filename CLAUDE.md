@@ -660,7 +660,7 @@ Job: TestCasesGenerator
 - **Core CLI**: `build/libs/dmtools-v{version}-all.jar` (Main-Class: `JobRunner`)
 - **Server**: `dmtools-appengine.jar` (Spring Boot executable)
 - **Automation**: `dmtools-automation-v{version}-all.jar`
-- **Installation**: `curl -fsSL https://raw.githubusercontent.com/IstiN/dmtools/main/install.sh | bash`
+- **Installation**: `curl -fsSL https://raw.githubusercontent.com/IstiN/dmtools/main/install.sh | bash` (optionally override via `DMTOOLS_INSTALL_URL`)
 
 ## Skill Documentation (`dmtools-ai-docs/`)
 
