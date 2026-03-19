@@ -69,6 +69,8 @@ dmtools --version
 dmtools list
 ```
 
+**Advanced:** Set `DMTOOLS_INSTALL_URL` to override the install script URL (e.g. when using a fork or custom branch). When unset, the default URL above is used.
+
 See [INSTALL_INSTRUCTIONS.md](INSTALL_INSTRUCTIONS.md) for detailed installation guide and troubleshooting.
 
 ### Configuration

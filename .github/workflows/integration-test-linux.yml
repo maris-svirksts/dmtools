@@ -23,15 +23,28 @@ jobs:
           cache-key-suffix: '-integration-test-linux'
 
       - name: Install DMTools CLI
+        env:
+          DMTOOLS_INSTALL_URL: ${{ vars.DMTOOLS_INSTALL_URL }}
+          DMTOOLS_VERSION: ${{ vars.DMTOOLS_VERSION }}
         run: |
           set +e  # Don't exit on error, we want to see what happens
           echo "Downloading and running install script..."
-          curl -fsSL https://github.com/IstiN/dmtools/releases/latest/download/install | bash
+          if [ -n "${DMTOOLS_VERSION:-}" ]; then
+            echo "Using DMTOOLS_VERSION=${DMTOOLS_VERSION}"
+            curl -fsSL "${DMTOOLS_INSTALL_URL:-https://github.com/IstiN/dmtools/releases/latest/download/install.sh}" | bash -s -- "${DMTOOLS_VERSION}"
+          else
+            echo "DMTOOLS_VERSION is not set; installer will use latest."
+            curl -fsSL "${DMTOOLS_INSTALL_URL:-https://github.com/IstiN/dmtools/releases/latest/download/install.sh}" | bash
+          fi
           INSTALL_EXIT=$?
           if [ $INSTALL_EXIT -ne 0 ]; then
             echo "Install script exited with code: $INSTALL_EXIT"
-            echo "Trying direct install.sh as fallback..."
-            curl -fsSL https://github.com/IstiN/dmtools/releases/latest/download/install.sh | bash
+            echo "Trying raw.githubusercontent.com as fallback..."
+            if [ -n "${DMTOOLS_VERSION:-}" ]; then
+              curl -fsSL "https://raw.githubusercontent.com/IstiN/dmtools/main/install.sh" | bash -s -- "${DMTOOLS_VERSION}"
+            else
+              curl -fsSL "https://raw.githubusercontent.com/IstiN/dmtools/main/install.sh" | bash
+            fi
           fi
           echo "$HOME/.dmtools/bin" >> $GITHUB_PATH
 

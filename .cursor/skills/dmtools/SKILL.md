@@ -49,6 +49,7 @@ which dmtools || echo "DMtools not installed"
 # Offer to install DMtools automatically
 curl -fsSL https://raw.githubusercontent.com/IstiN/dmtools/main/install.sh | bash
 ```
+You can override the installer URL with `DMTOOLS_INSTALL_URL` if you use a fork.
 
 ### Step 2: Check for dmtools.env configuration
 ```bash
@@ -159,6 +160,7 @@ If automated setup didn't work, follow these manual steps:
 ```bash
 curl -fsSL https://raw.githubusercontent.com/IstiN/dmtools/main/install.sh | bash
 ```
+Override the installer URL with `DMTOOLS_INSTALL_URL` if you use a fork.
 
 #### 2. Create dmtools.env
 Create `dmtools.env` in project root (see template in FIRST-TIME SETUP section)

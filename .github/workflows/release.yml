@@ -282,7 +282,7 @@ jobs:
 
           **Automatic Installation (Recommended):**
           \`\`\`bash
-          curl -fsSL https://github.com/IstiN/dmtools/releases/download/v${VERSION}/skill-install.sh | bash
+          curl -fsSL "${DMTOOLS_INSTALL_URL:-https://github.com/IstiN/dmtools/releases/download/v${VERSION}/skill-install.sh}" | bash
           \`\`\`
 
           **Manual Installation:**
@@ -298,7 +298,7 @@ jobs:
 
           **DMTools CLI - macOS / Linux / Git Bash:**
           \`\`\`bash
-          curl -fsSL https://raw.githubusercontent.com/IstiN/dmtools/v${VERSION}/install.sh | bash -s v${VERSION}
+          curl -fsSL "${DMTOOLS_INSTALL_URL:-https://raw.githubusercontent.com/IstiN/dmtools/v${VERSION}/install.sh}" | bash -s v${VERSION}
           \`\`\`
 
           **DMTools CLI - Windows (cmd.exe):**

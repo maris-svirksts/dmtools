@@ -239,7 +239,12 @@ run_installer() {
             exit 1
         fi
 
-        "$pwsh_exe" -NoLogo -NoProfile -Command "Invoke-RestMethod -Uri '${install_ps_url}' | Invoke-Expression"
+        if [ "$version" = "latest" ]; then
+            "$pwsh_exe" -NoLogo -NoProfile -Command "Invoke-RestMethod -Uri '${install_ps_url}' | Invoke-Expression"
+            return $?
+        fi
+
+        DMTOOLS_VERSION="$version" "$pwsh_exe" -NoLogo -NoProfile -Command "Invoke-RestMethod -Uri '${install_ps_url}' | Invoke-Expression"
         return $?
     fi
 

@@ -83,12 +83,23 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ~/.dmtools
-        key: dmtools-v1.7.127-${{ runner.os }}
+        key: dmtools-latest-${{ runner.os }}
 
     - name: Install DMTools CLI
       if: steps.cache-dmtools.outputs.cache-hit != 'true'
+      env:
+        DMTOOLS_INSTALL_URL: ${{ vars.DMTOOLS_INSTALL_URL }}
+        DMTOOLS_VERSION: ${{ vars.DMTOOLS_VERSION }}
       run: |
-        curl -fsSL https://raw.githubusercontent.com/IstiN/dmtools/v1.7.127/install.sh | DMTOOLS_VERSION=v1.7.127 bash
+        DMTOOLS_URL="${DMTOOLS_INSTALL_URL:-https://github.com/IstiN/dmtools/releases/latest/download/install.sh}"
+        echo "Installing DMTools from: ${DMTOOLS_URL}"
+        if [ -n "${DMTOOLS_VERSION:-}" ]; then
+          echo "Using DMTOOLS_VERSION=${DMTOOLS_VERSION}"
+          curl -fsSL "${DMTOOLS_URL}" | bash -s -- "${DMTOOLS_VERSION}"
+        else
+          echo "DMTOOLS_VERSION is not set; installer will use latest."
+          curl -fsSL "${DMTOOLS_URL}" | bash
+        fi
 
     - name: Add DMTools to PATH
       run: |
@@ -207,6 +218,8 @@ Configure these in **Settings → Secrets and variables → Actions → Variable
 | `DEFAULT_LLM` | Default AI provider | `bedrock` |
 | `DEFAULT_TRACKER` | Default tracker | `jira` |
 | `PROMPT_CHUNK_TOKEN_LIMIT` | Token limit per chunk | `4000` |
+| `DMTOOLS_INSTALL_URL` | (Optional) Custom install script URL for forks | `https://github.com/YOUR_ORG/dmtools/releases/latest/download/install.sh` |
+| `DMTOOLS_VERSION` | (Optional) Pin DMtools CLI version; when unset installer uses latest | `v1.7.126` |
 
 ### 3. Teammate Configuration File
 
@@ -425,7 +438,7 @@ Test credentials:
 
 ## Best Practices
 
-1. **Version Pinning**: Use specific DMtools version in cache key and install script
+1. **Version Pinning**: Set `DMTOOLS_VERSION` only when you need reproducible builds; leave it unset to always install latest
 2. **Secret Rotation**: Regularly rotate API tokens and secrets
 3. **Config Validation**: Use JSON schema validation for config files
 4. **Error Notifications**: Add Slack/email notifications on failure

@@ -56,8 +56,19 @@ jobs:
         fi
 
     - name: Install DMTools CLI
+      env:
+        DMTOOLS_INSTALL_URL: ${{ vars.DMTOOLS_INSTALL_URL }}
+        DMTOOLS_VERSION: ${{ vars.DMTOOLS_VERSION }}
       run: |
-        curl -fsSL https://raw.githubusercontent.com/IstiN/dmtools/main/install.sh | bash
+        DMTOOLS_URL="${DMTOOLS_INSTALL_URL:-https://github.com/IstiN/dmtools/releases/latest/download/install.sh}"
+        echo "Installing DMTools from: ${DMTOOLS_URL}"
+        if [ -n "${DMTOOLS_VERSION:-}" ]; then
+          echo "Using DMTOOLS_VERSION=${DMTOOLS_VERSION}"
+          curl -fsSL "${DMTOOLS_URL}" | bash -s -- "${DMTOOLS_VERSION}"
+        else
+          echo "DMTOOLS_VERSION is not set; installer will use latest."
+          curl -fsSL "${DMTOOLS_URL}" | bash
+        fi
         echo "$HOME/.dmtools/bin" >> $GITHUB_PATH
 
     - name: Build and Install DMTools CLI from source

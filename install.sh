@@ -21,6 +21,33 @@ BIN_DIR="$INSTALL_DIR/bin"
 JAR_PATH="$INSTALL_DIR/dmtools.jar"
 SCRIPT_PATH="$BIN_DIR/dmtools"
 
+# Optional: allow bootstrapping the installer from a custom URL.
+# This is useful when users want to run a fork/branch installer while still
+# copy-pasting the standard command from docs/CI.
+maybe_reexec_from_install_url() {
+    if [ -z "${DMTOOLS_INSTALL_URL:-}" ]; then
+        return 0
+    fi
+
+    # Prevent infinite recursion if the custom installer also uses this feature.
+    if [ "${DMTOOLS_INSTALL_URL_BOOTSTRAPPED:-false}" = "true" ]; then
+        return 0
+    fi
+
+    export DMTOOLS_INSTALL_URL_BOOTSTRAPPED=true
+    progress "DMTOOLS_INSTALL_URL is set - bootstrapping installer from: ${DMTOOLS_INSTALL_URL}"
+
+    if command -v curl >/dev/null 2>&1; then
+        curl -fsSL "${DMTOOLS_INSTALL_URL}" | bash -s -- "$@"
+        exit $?
+    elif command -v wget >/dev/null 2>&1; then
+        wget -qO- "${DMTOOLS_INSTALL_URL}" | bash -s -- "$@"
+        exit $?
+    else
+        error "DMTOOLS_INSTALL_URL is set, but neither curl nor wget is available to download it."
+    fi
+}
+
 # Helper functions
 error() {
     echo -e "${RED}Error: $1${NC}" >&2
@@ -885,6 +912,9 @@ print_instructions() {
 # Main installation function
 main() {
     info "🚀 Installing DMTools CLI..."
+
+    # If requested, re-exec installer from a custom URL.
+    maybe_reexec_from_install_url "$@"
     
     # Check prerequisites
     check_java

@@ -110,8 +110,12 @@ jobs:
         echo "$HOME/.local/bin" >> $GITHUB_PATH
 
     - name: Install DMTools CLI
+      env:
+        DMTOOLS_INSTALL_URL: ${{ vars.DMTOOLS_INSTALL_URL }}
       run: |
-        curl -fsSL https://raw.githubusercontent.com/IstiN/dmtools/main/install.sh | bash
+        DMTOOLS_URL="${DMTOOLS_INSTALL_URL:-https://github.com/IstiN/dmtools/releases/latest/download/install.sh}"
+        echo "Installing DMTools from: ${DMTOOLS_URL}"
+        curl -fsSL "${DMTOOLS_URL}" | bash
         echo "$HOME/.dmtools/bin" >> $GITHUB_PATH
 
     - name: Run AI Teammate

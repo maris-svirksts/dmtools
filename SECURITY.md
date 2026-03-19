@@ -35,4 +35,4 @@ We follow the [GitHub coordinated disclosure guidelines](https://docs.github.com
 - Never commit real credentials to your repository. Use `dmtools.env` (already in `.gitignore`).
 - Rotate any credentials that may have been accidentally exposed immediately.
 - Run DMTools with the minimum required permissions for each integration.
-- Keep your DMTools installation up to date: `curl -fsSL https://raw.githubusercontent.com/IstiN/dmtools/main/install.sh | bash`
+- Keep your DMTools installation up to date: `curl -fsSL https://raw.githubusercontent.com/IstiN/dmtools/main/install.sh | bash` (optionally override via `DMTOOLS_INSTALL_URL`)

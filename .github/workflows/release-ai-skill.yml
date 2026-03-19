@@ -112,7 +112,7 @@ jobs:
 
           ### Automatic Installation (Recommended)
           ```bash
-          curl -fsSL https://github.com/IstiN/dmtools/releases/download/skill-v$VERSION/install.sh | bash
+          curl -fsSL "${DMTOOLS_INSTALL_URL:-https://github.com/IstiN/dmtools/releases/download/skill-v$VERSION/install.sh}" | bash
           ```
 
           ### Manual Installation
@@ -151,7 +151,7 @@ jobs:
 
           Re-run the installer to update:
           ```bash
-          curl -fsSL https://github.com/IstiN/dmtools/releases/latest/download/install.sh | bash
+          curl -fsSL "${DMTOOLS_INSTALL_URL:-https://github.com/IstiN/dmtools/releases/latest/download/install.sh}" | bash
           ```
 
           ## 📝 Changelog
