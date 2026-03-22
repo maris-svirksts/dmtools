@@ -40,6 +40,7 @@ class InstructionProcessorTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         gson = new GsonBuilder().setPrettyPrinting().create();
+        processor = new InstructionProcessor(null, tempDir.toString());
     }
 
     @Test
@@ -448,5 +449,61 @@ class InstructionProcessorTest {
         p.extractIfNeeded("https://raw.githubusercontent.com/IstiN/dmtools/main/CLAUDE.md");
 
         verifyNoInteractions(confluence);
+    }
+
+    // -----------------------------------------------------------------------
+    // buildCombinedPrompt
+    // -----------------------------------------------------------------------
+
+    @Test
+    void testBuildCombinedPrompt_OnlyCliPrompt() throws IOException {
+        String result = processor.buildCombinedPrompt("base prompt", null);
+        assertEquals("base prompt", result);
+    }
+
+    @Test
+    void testBuildCombinedPrompt_OnlyCliPrompts() throws IOException {
+        String result = processor.buildCombinedPrompt(null, new String[]{"part A", "part B"});
+        assertEquals("part A\n\npart B", result);
+    }
+
+    @Test
+    void testBuildCombinedPrompt_BothCombined() throws IOException {
+        String result = processor.buildCombinedPrompt("base", new String[]{"extra A", "extra B"});
+        assertEquals("base\n\nextra A\n\nextra B", result);
+    }
+
+    @Test
+    void testBuildCombinedPrompt_NullBothReturnsNull() throws IOException {
+        assertNull(processor.buildCombinedPrompt(null, null));
+    }
+
+    @Test
+    void testBuildCombinedPrompt_EmptyCliPromptAndEmptyArray_ReturnsNull() throws IOException {
+        assertNull(processor.buildCombinedPrompt("", new String[0]));
+    }
+
+    @Test
+    void testBuildCombinedPrompt_BlankEntriesInArraySkipped() throws IOException {
+        String result = processor.buildCombinedPrompt("start", new String[]{"", "  ", "valid"});
+        assertEquals("start\n\nvalid", result);
+    }
+
+    @Test
+    void testBuildCombinedPrompt_FilePathInCliPrompts_ContentExpanded() throws IOException {
+        Path file = tempDir.resolve("context.md");
+        Files.writeString(file, "Fetched from file");
+
+        String result = processor.buildCombinedPrompt("prefix", new String[]{"./" + file.getFileName()});
+        assertEquals("prefix\n\nFetched from file", result);
+    }
+
+    @Test
+    void testBuildCombinedPrompt_FilePathInCliPrompt_ContentExpanded() throws IOException {
+        Path file = tempDir.resolve("role.md");
+        Files.writeString(file, "Role content");
+
+        String result = processor.buildCombinedPrompt("./" + file.getFileName(), null);
+        assertEquals("Role content", result);
     }
 }

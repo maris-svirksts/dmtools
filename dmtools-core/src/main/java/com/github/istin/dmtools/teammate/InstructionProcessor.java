@@ -75,6 +75,57 @@ public class InstructionProcessor {
     }
 
     /**
+     * Builds a single combined prompt from an optional scalar {@code cliPrompt} and an optional
+     * array of {@code cliPrompts} entries.
+     *
+     * <p>Processing rules:
+     * <ol>
+     *   <li>{@code cliPrompt} (if non-blank) is extracted via {@link #extractIfNeeded} and
+     *       used as the starting value.</li>
+     *   <li>Each element of {@code cliPrompts} is extracted via {@link #extractIfNeeded};
+     *       non-blank results are appended with a double-newline separator.</li>
+     *   <li>If the combined result is empty, {@code null} is returned.</li>
+     * </ol>
+     *
+     * @param cliPrompt  Single prompt string (may be {@code null})
+     * @param cliPrompts Array of prompt entries (may be {@code null} or empty)
+     * @return Combined prompt string, or {@code null} if nothing to combine
+     * @throws IOException if content extraction fails
+     */
+    public String buildCombinedPrompt(String cliPrompt, String[] cliPrompts) throws IOException {
+        StringBuilder combined = new StringBuilder();
+
+        // Start with the scalar cliPrompt
+        if (cliPrompt != null && !cliPrompt.trim().isEmpty()) {
+            String[] extracted = extractIfNeeded(cliPrompt);
+            String single = extracted.length > 0 ? extracted[0] : null;
+            if (single != null && !single.trim().isEmpty()) {
+                combined.append(single);
+            }
+        }
+
+        // Append each cliPrompts entry
+        if (cliPrompts != null && cliPrompts.length > 0) {
+            String[] processedParts = extractIfNeeded(cliPrompts);
+            for (String part : processedParts) {
+                if (part != null && !part.trim().isEmpty()) {
+                    if (combined.length() > 0) combined.append("\n\n");
+                    combined.append(part);
+                }
+            }
+        }
+
+        return combined.length() > 0 ? combined.toString() : null;
+    }
+
+    /** Returns {@code true} when {@code input} should be fetched from a remote or local source
+     *  (i.e. it is a GitHub URL, a generic HTTPS URL, or a local file path). */
+    boolean isExtractable(String input) {
+        if (input == null) return false;
+        return isGithubUrl(input) || input.startsWith("https://") || isFilePath(input);
+    }
+
+    /**
      * Returns true if the URL points to a GitHub file.
      */
     boolean isGithubUrl(String input) {

@@ -26,6 +26,7 @@ import com.github.istin.dmtools.prompt.IPromptTemplateReader;
 import com.github.istin.dmtools.search.CodebaseSearchOrchestrator;
 import com.github.istin.dmtools.search.ConfluenceSearchOrchestrator;
 import com.github.istin.dmtools.search.TrackerSearchOrchestrator;
+import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import dagger.Component;
 import lombok.Getter;
@@ -64,6 +65,9 @@ public class Teammate extends AbstractJob<Teammate.TeammateParams, List<ResultIt
         @SerializedName("cliPrompt")
         private String cliPrompt;
 
+        @SerializedName("cliPrompts")
+        private String[] cliPrompts;
+
         @SerializedName("skipAIProcessing")
         private boolean skipAIProcessing = false;
 
@@ -87,6 +91,9 @@ public class Teammate extends AbstractJob<Teammate.TeammateParams, List<ResultIt
 
         @SerializedName("additionalInstructions")
         private String[] additionalInstructions;
+
+        @SerializedName("writeAgentParamsToFiles")
+        private boolean writeAgentParamsToFiles = false;
 
     }
 
@@ -151,6 +158,7 @@ public class Teammate extends AbstractJob<Teammate.TeammateParams, List<ResultIt
     // JavaScript bridge is now inherited from AbstractJob
     
     InstructionProcessor instructionProcessor;
+    AgentParamsFileWriter agentParamsFileWriter;
 
     private static TeammateComponent teammateComponent;
 
@@ -195,6 +203,7 @@ public class Teammate extends AbstractJob<Teammate.TeammateParams, List<ResultIt
         
         // Initialize instruction processor after dependencies are injected
         this.instructionProcessor = new InstructionProcessor(confluence);
+        this.agentParamsFileWriter = new AgentParamsFileWriter(this.instructionProcessor);
         
         logger.info("Teammate standalone initialization completed - AI type: {}", 
                    (ai != null ? ai.getClass().getSimpleName() : "null"));
@@ -223,6 +232,7 @@ public class Teammate extends AbstractJob<Teammate.TeammateParams, List<ResultIt
             
             // Initialize instruction processor after dependencies are injected
             this.instructionProcessor = new InstructionProcessor(confluence);
+            this.agentParamsFileWriter = new AgentParamsFileWriter(this.instructionProcessor);
             
             logger.info("Teammate server-managed initialization completed - AI type: {}", 
                        (ai != null ? ai.getClass().getSimpleName() : "null"));
@@ -272,6 +282,17 @@ public class Teammate extends AbstractJob<Teammate.TeammateParams, List<ResultIt
         }
 
         RequestDecompositionAgent.Result inputParams = expertParams.getAgentParams();
+
+        // Snapshot original params BEFORE InstructionProcessor resolves URLs/paths to content.
+        // Used later by AgentParamsFileWriter when writeAgentParamsToFiles=true.
+        final RequestDecompositionAgent.Result originalParams;
+        if (expertParams.isWriteAgentParamsToFiles()) {
+            Gson snapshotGson = new Gson();
+            originalParams = snapshotGson.fromJson(snapshotGson.toJson(inputParams), RequestDecompositionAgent.Result.class);
+        } else {
+            originalParams = null;
+        }
+
         String[] aiRoleArray = instructionProcessor.extractIfNeeded(inputParams.getAiRole());
         inputParams.setAiRole(aiRoleArray.length > 0 ? aiRoleArray[0] : "");
         String[] resolvedInstructions = instructionProcessor.extractIfNeeded(inputParams.getInstructions());
@@ -401,13 +422,11 @@ public class Teammate extends AbstractJob<Teammate.TeammateParams, List<ResultIt
 
             if (cliCommands != null && cliCommands.length > 0) {
                 try {
-                    // Process cliPrompt if configured (supports Confluence URLs, file paths, plain text)
-                    String processedPrompt = null;
-                    String rawCliPrompt = expertParams.getCliPrompt();
-                    if (rawCliPrompt != null && !rawCliPrompt.trim().isEmpty()) {
-                        String[] processedArray = instructionProcessor.extractIfNeeded(rawCliPrompt);
-                        processedPrompt = processedArray.length > 0 ? processedArray[0] : null;
-                        logger.info("Processed cliPrompt ({} chars)", processedPrompt != null ? processedPrompt.length() : 0);
+                    // Build combined CLI prompt from cliPrompt + cliPrompts via InstructionProcessor
+                    String processedPrompt = instructionProcessor.buildCombinedPrompt(
+                            expertParams.getCliPrompt(), expertParams.getCliPrompts());
+                    if (processedPrompt != null) {
+                        logger.info("Combined CLI prompt ready ({} chars)", processedPrompt.length());
                     }
 
                     // Append processed prompt to each CLI command if available
@@ -422,6 +441,17 @@ public class Teammate extends AbstractJob<Teammate.TeammateParams, List<ResultIt
 
                     // Write comments.md alongside request.md — same toText() format as chunks sent to AI
                     cliHelper.writeCommentsFile(inputContextPath, ticketContext.getComments());
+
+                    // When writeAgentParamsToFiles=true: expand agent params into separate files in the
+                    // input folder, then replace request.md with minimal ticket-only content.
+                    if (expertParams.isWriteAgentParamsToFiles() && originalParams != null) {
+                        agentParamsFileWriter.writeToInputFolder(inputContextPath, originalParams);
+                        // Overwrite request.md with minimal ticket info only
+                        java.nio.file.Path requestMd = inputContextPath.resolve("request.md");
+                        java.nio.file.Files.writeString(requestMd,
+                                textFieldsOnly != null ? textFieldsOnly : "");
+                        logger.info("writeAgentParamsToFiles: rewrote request.md with ticket info only, params in input folder");
+                    }
 
                     // Run preCliJSAction to allow extending input folder with extra content before CLI execution
                     String preCliJSAction = expertParams.getPreCliJSAction();

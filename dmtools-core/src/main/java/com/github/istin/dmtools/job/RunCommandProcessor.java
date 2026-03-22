@@ -21,16 +21,26 @@ public class RunCommandProcessor {
     
     private final EncodingDetector encodingDetector;
     private final ConfigurationMerger configurationMerger;
+    private final ParentConfigResolver parentConfigResolver;
     
     public RunCommandProcessor() {
         this.encodingDetector = new EncodingDetector();
         this.configurationMerger = new ConfigurationMerger();
+        this.parentConfigResolver = new ParentConfigResolver();
     }
     
     // Constructor for testing with dependency injection
     public RunCommandProcessor(EncodingDetector encodingDetector, ConfigurationMerger configurationMerger) {
         this.encodingDetector = encodingDetector;
         this.configurationMerger = configurationMerger;
+        this.parentConfigResolver = new ParentConfigResolver(configurationMerger);
+    }
+
+    // Full DI constructor
+    public RunCommandProcessor(EncodingDetector encodingDetector, ConfigurationMerger configurationMerger, ParentConfigResolver parentConfigResolver) {
+        this.encodingDetector = encodingDetector;
+        this.configurationMerger = configurationMerger;
+        this.parentConfigResolver = parentConfigResolver;
     }
     
     /**
@@ -85,6 +95,10 @@ public class RunCommandProcessor {
         try {
             // Load JSON from file
             String fileJson = loadJsonFromFile(filePath);
+
+            // Resolve parent config inheritance (parent.path → deep-merge + override/merge semantics)
+            JSONObject resolvedConfig = parentConfigResolver.resolve(new JSONObject(fileJson), Paths.get(filePath));
+            fileJson = resolvedConfig.toString();
 
             // Process encoded configuration if provided
             String finalConfigJson;
