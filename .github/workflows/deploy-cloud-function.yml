@@ -1,0 +1,87 @@
+name: Deploy spec-dispatch Cloud Function
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'cloud-functions/spec-dispatch/**'
+      - '.github/workflows/deploy-cloud-function.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+
+      # ── Deploy ──────────────────────────────────────────────────────────────
+      # GitHub Secrets (sensitive):
+      #   FUNC_GH_WORKFLOW_DISPATCH_PAT  — GitHub PAT with actions:write scope
+      #   FUNC_ADO_WORK_ITEM_PAT         — ADO PAT with Work Items: Read scope
+      #
+      # GitHub Variables (non-sensitive):
+      #   FUNC_GITHUB_OWNER              — GitHub org/user owning the target repo
+      #   FUNC_GITHUB_REPO               — Repo where workflow is dispatched
+      #   FUNC_GITHUB_WORKFLOW_FILENAME  — (default: ai-teammate-ado.yml)
+      #   FUNC_GITHUB_WORKFLOW_REF       — (default: main)
+      #   FUNC_GITHUB_WORKFLOW_CONFIG_FILE — (default: agents/ado_story_description.json)
+      #   FUNC_AI_USER_MATCH             — ADO assignee to match (default: AI Teammate)
+      #   FUNC_SPEC_COLUMN_NAME          — Board column name (default: Specification)
+      #   FUNC_ALLOWED_WORK_ITEM_TYPES   — Comma-separated (default: Feature,User Story)
+      #   FUNC_ADO_ORG_URL               — https://dev.azure.com/yourorg
+      #   FUNC_ADO_PROJECT               — ADO project name
+      - name: Deploy Cloud Function
+        run: |
+          gcloud functions deploy spec-dispatch \
+            --gen2 \
+            --runtime=python311 \
+            --region=us-central1 \
+            --source=./cloud-functions/spec-dispatch \
+            --entry-point=spec_dispatch \
+            --trigger-http \
+            --allow-unauthenticated \
+            --memory=256Mi \
+            --timeout=60s \
+            --min-instances=0 \
+            --max-instances=10 \
+            --project=${{ vars.GCP_PROJECT_ID }} \
+            --set-env-vars="\
+          FUNC_GITHUB_OWNER=${{ vars.FUNC_GITHUB_OWNER }},\
+          FUNC_GITHUB_REPO=${{ vars.FUNC_GITHUB_REPO }},\
+          FUNC_GITHUB_WORKFLOW_FILENAME=${{ vars.FUNC_GITHUB_WORKFLOW_FILENAME }},\
+          FUNC_GITHUB_WORKFLOW_REF=${{ vars.FUNC_GITHUB_WORKFLOW_REF }},\
+          FUNC_GITHUB_WORKFLOW_CONFIG_FILE=${{ vars.FUNC_GITHUB_WORKFLOW_CONFIG_FILE }},\
+          FUNC_AI_USER_MATCH=${{ vars.FUNC_AI_USER_MATCH }},\
+          FUNC_SPEC_COLUMN_NAME=${{ vars.FUNC_SPEC_COLUMN_NAME }},\
+          FUNC_ALLOWED_WORK_ITEM_TYPES=${{ vars.FUNC_ALLOWED_WORK_ITEM_TYPES }},\
+          FUNC_ADO_ORG_URL=${{ vars.FUNC_ADO_ORG_URL }},\
+          FUNC_ADO_PROJECT=${{ vars.FUNC_ADO_PROJECT }},\
+          FUNC_GH_WORKFLOW_DISPATCH_PAT=${{ secrets.FUNC_GH_WORKFLOW_DISPATCH_PAT }},\
+          FUNC_ADO_WORK_ITEM_PAT=${{ secrets.FUNC_ADO_WORK_ITEM_PAT }}"
+
+      - name: Show function URL
+        run: |
+          URL=$(gcloud functions describe spec-dispatch \
+            --region=us-central1 \
+            --project=${{ vars.GCP_PROJECT_ID }} \
+            --format="value(serviceConfig.uri)")
+          echo "✅ Function URL: $URL"
+          echo "### Deployed ✅" >> $GITHUB_STEP_SUMMARY
+          echo "**URL:** \`$URL\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Point your ADO Service Hook to this URL." >> $GITHUB_STEP_SUMMARY
