@@ -43,6 +43,10 @@ So that [business value/benefit]</p>
   <li>[Future enhancements not part of current scope]</li>
   <li>[Related features that require separate stories]</li>
 </ul>
+
+<!-- ONLY include References section if the original description contains <img> tags or links -->
+<p><b>References:</b></p>
+<p>[PASTE THE ORIGINAL <img> TAG HERE VERBATIM FROM THE TICKET DESCRIPTION IN request.md — do not change src, alt or any attribute]</p>
 ```
 
 ## Guidelines
