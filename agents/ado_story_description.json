@@ -21,7 +21,7 @@
       "fewShots": ""
     },
     "cliCommands": [
-      "./cicd/scripts/run-cursor-agent.sh \"**IMPORTANT** implementation details and development is not part of the task. Main request is in 'input' folder, read all files there and do what is requested following instructions from input. Request.md file contains json with all details. 'request' string there contain details of tickets from which was triggered the request. **IMPORTANT** You must write response to the request to outputs/response.md according to formatting rules. **CRITICAL** The input folder may contain image files (e.g. image.png) \u2014 do NOT read, analyse or open them. The original ticket description in request.md already contains the correct <img> tag with the full ADO attachment URL and GUID. Copy that exact <img> tag from request.md into your output unchanged. NEVER replace it with a local filename reference like <img src=image.png>.\""
+      "./cicd/scripts/run-cursor-agent.sh \"**IMPORTANT** implementation details and development is not part of the task. Main request is in 'input' folder, read all files there and do what is requested following instructions from input. Request.md file contains json with all details. 'request' string there contain details of tickets from which was triggered the request. **IMPORTANT** You must write response to the request to outputs/response.md according to formatting rules. **CRITICAL** The input folder may contain image files (e.g. image.png) \u2014 you MAY read them to understand the design, but in your output you MUST reference the image using the original <img> tag copied verbatim from the ticket description in request.md (it contains the full ADO URL with a unique GUID). NEVER write <img src=image.png> or any local filename \u2014 always use the full URL from request.md.\""
     ],
     "outputType": "field",
     "fieldName": "Description",
@@ -32,7 +32,6 @@
     "inputJql": "SELECT [System.Id] FROM WorkItems WHERE [System.Id] = YOUR_WORK_ITEM_ID",
     "initiator": "Uladzimir_Klyshevich@epam.com",
     "preJSAction": "agents/js/checkWipTagAdo.js",
-    "postJSAction": "agents/js/assignForReviewAdo.js",
-    "skipAllAttachments": true
+    "postJSAction": "agents/js/assignForReviewAdo.js"
   }
 }
