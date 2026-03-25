@@ -21,7 +21,7 @@
       "fewShots": ""
     },
     "cliCommands": [
-      "./cicd/scripts/run-cursor-agent.sh \"**IMPORTANT** implementation details and development is not part of the task. Main request is in 'input' folder, read all files there and do what is requested following instructions from input. Request.md file contains json with all details. 'request' string there contain details of tickets from which was triggered the request. **IMPORTANT** You must write response to the request to outputs/response.md according to formatting rules. **IMPORTANT** Follow preserved references rules: copy all <img> tags and attachment references from the original description verbatim into your output \u2014 do not modify, skip, or recreate them.\""
+      "./cicd/scripts/run-cursor-agent.sh \"**IMPORTANT** implementation details and development is not part of the task. Main request is in 'input' folder, read all files there and do what is requested following instructions from input. Request.md file contains json with all details. 'request' string there contain details of tickets from which was triggered the request. **IMPORTANT** You must write response to the request to outputs/response.md according to formatting rules. **CRITICAL** The original ticket description may contain <img> tags with full ADO URLs like <img src=\\\"https://dev.azure.com/.../_apis/wit/attachments/{guid}?fileName=image.png\\\" alt=...> \u2014 you MUST copy these tags character-for-character into your output. Do NOT simplify, reconstruct or replace the src with just a filename. The GUID in the URL is unique and cannot be recovered if lost.\""
     ],
     "outputType": "field",
     "fieldName": "Description",
