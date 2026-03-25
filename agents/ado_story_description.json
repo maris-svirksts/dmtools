@@ -7,7 +7,7 @@
     "agentParams": {
       "aiRole": "Experienced Business Analyst",
       "instructions": [
-        "https://dmtools.atlassian.net/wiki/spaces/AINA/pages/11665485/Template+Story",
+        "./agents/instructions/ado/story_template.md",
         "./agents/instructions/common/response_output.md",
         "./agents/instructions/common/no_development.md",
         "./agents/instructions/common/error_handling.md",
@@ -15,7 +15,7 @@
         "./agents/instructions/common/media_handling.md",
         "./agents/instructions/enhancement/no_ticket_reference.md",
         "./agents/instructions/common/ado_html_formatting.md",
-        "**IMPORTANT** your role just write description of the story based on the confluence page template!"
+        "**IMPORTANT** your role is to write the description of the story following the ADO story template!"
       ],
       "knownInfo": "",
       "formattingRules": "Use proper HTML formatting for Azure DevOps work items. Use <p>, <br>, <ul>/<li>, <h3> tags. Never use bare newlines or Jira wiki syntax like !image.png!. Embed images as <img src=\"filename\" /> tags.",
