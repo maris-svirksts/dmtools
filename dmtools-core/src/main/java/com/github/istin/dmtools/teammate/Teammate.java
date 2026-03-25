@@ -89,6 +89,9 @@ public class Teammate extends AbstractJob<Teammate.TeammateParams, List<ResultIt
         @SerializedName("skipVideoAttachments")
         private boolean skipVideoAttachments = false;
 
+        @SerializedName("skipAllAttachments")
+        private boolean skipAllAttachments = false;
+
         @SerializedName("additionalInstructions")
         private String[] additionalInstructions;
 
@@ -357,7 +360,10 @@ public class Teammate extends AbstractJob<Teammate.TeammateParams, List<ResultIt
             ticketContext.prepareContext(true, false);
             // Get attachments and convert to text
             List<? extends IAttachment> attachments = ticket.getAttachments();
-            if (expertParams.isSkipVideoAttachments() && attachments != null) {
+            if (expertParams.isSkipAllAttachments()) {
+                logger.info("⏭️ Skipping all attachments (skipAllAttachments=true)");
+                attachments = null;
+            } else if (expertParams.isSkipVideoAttachments() && attachments != null) {
                 List<IAttachment> filtered = new ArrayList<>();
                 for (IAttachment a : attachments) {
                     if (a != null && CliExecutionHelper.isVideoFile(a.getName())) {
