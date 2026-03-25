@@ -1,12 +1,12 @@
 {
-  "name" : "Teammate",
-  "params" : {
-    "metadata" : {
-      "contextId" : "ado_story_description"
+  "name": "Teammate",
+  "params": {
+    "metadata": {
+      "contextId": "ado_story_description"
     },
-    "agentParams" : {
-      "aiRole" : "Experienced Business Analyst",
-      "instructions" : [
+    "agentParams": {
+      "aiRole": "Experienced Business Analyst",
+      "instructions": [
         "https://dmtools.atlassian.net/wiki/spaces/AINA/pages/11665485/Template+Story",
         "./agents/instructions/common/response_output.md",
         "./agents/instructions/common/no_development.md",
@@ -14,25 +14,25 @@
         "./agents/instructions/common/preserve_references.md",
         "./agents/instructions/common/media_handling.md",
         "./agents/instructions/enhancement/no_ticket_reference.md",
+        "./agents/instructions/common/ado_html_formatting.md",
         "**IMPORTANT** your role just write description of the story based on the confluence page template!"
       ],
-      "knownInfo" : "",
-      "formattingRules" : "Use HTML formatting for Azure DevOps work items",
-      "fewShots" : ""
+      "knownInfo": "",
+      "formattingRules": "Use proper HTML formatting for Azure DevOps work items. Use <p>, <br>, <ul>/<li>, <h3> tags. Never use bare newlines or Jira wiki syntax like !image.png!. Embed images as <img src=\"filename\" /> tags.",
+      "fewShots": ""
     },
-    "cliCommands" : [
+    "cliCommands": [
       "./cicd/scripts/run-cursor-agent.sh \"**IMPORTANT** implementation details and development is not part of the task. Main request is in 'input' folder, read all files there and do what is requested following instructions from input. Request.md file contains json with all details. 'request' string there contain details of tickets from which was triggered the request. **IMPORTANT** You must write response to the request to outputs/response.md according to formatting rules\""
     ],
-    "outputType" : "field",
-    "fieldName" : "Description",
-    "operationType" : "Replace",
-    "ticketContextDepth" : 0,
-    "attachResponseAsFile" : false,
-    "skipAIProcessing" : true,
-    "inputJql" : "SELECT [System.Id] FROM WorkItems WHERE [System.Id] = YOUR_WORK_ITEM_ID",
-    "initiator" : "Uladzimir_Klyshevich@epam.com",
-    "preJSAction" : "agents/js/checkWipTagAdo.js",
-    "postJSAction" : "agents/js/assignForReviewAdo.js"
+    "outputType": "field",
+    "fieldName": "Description",
+    "operationType": "Replace",
+    "ticketContextDepth": 0,
+    "attachResponseAsFile": false,
+    "skipAIProcessing": true,
+    "inputJql": "SELECT [System.Id] FROM WorkItems WHERE [System.Id] = YOUR_WORK_ITEM_ID",
+    "initiator": "Uladzimir_Klyshevich@epam.com",
+    "preJSAction": "agents/js/checkWipTagAdo.js",
+    "postJSAction": "agents/js/assignForReviewAdo.js"
   }
 }
-
