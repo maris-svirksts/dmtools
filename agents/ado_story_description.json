@@ -11,8 +11,7 @@
         "./agents/instructions/common/response_output.md",
         "./agents/instructions/common/no_development.md",
         "./agents/instructions/common/error_handling.md",
-        "./agents/instructions/common/preserve_references.md",
-        "./agents/instructions/common/media_handling.md",
+        "./agents/instructions/ado/preserve_references.md",
         "./agents/instructions/enhancement/no_ticket_reference.md",
         "./agents/instructions/common/ado_html_formatting.md",
         "**IMPORTANT** your role is to write the description of the story following the ADO story template!"
