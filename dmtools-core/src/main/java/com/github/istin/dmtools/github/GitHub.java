@@ -525,6 +525,47 @@ public abstract class GitHub extends AbstractRestClient implements SourceCode, U
     }
 
     @MCPTool(
+            name = "github_update_pr_comment",
+            description = "Update (edit) an existing comment on a GitHub pull request or issue by its comment ID.",
+            integration = "github",
+            category = "pull_requests"
+    )
+    public String updatePullRequestComment(
+            @MCPParam(name = "workspace", description = "The GitHub owner/organization name", required = true, example = "IstiN")
+            String workspace,
+            @MCPParam(name = "repository", description = "The GitHub repository name", required = true, example = "dmtools")
+            String repository,
+            @MCPParam(name = "commentId", description = "The ID of the comment to update", required = true, example = "123456789")
+            String commentId,
+            @MCPParam(name = "text", description = "The new comment text (replaces existing content)", required = true, example = "✅ Analysis complete.")
+            String text) throws IOException {
+        String path = path(String.format("repos/%s/%s/issues/comments/%s", workspace, repository, commentId));
+        GenericRequest patchRequest = new GenericRequest(this, path);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("body", text);
+        patchRequest.setBody(jsonObject.toString());
+        return patch(patchRequest);
+    }
+
+    @MCPTool(
+            name = "github_delete_pr_comment",
+            description = "Delete a comment on a GitHub pull request or issue by its comment ID.",
+            integration = "github",
+            category = "pull_requests"
+    )
+    public void deletePullRequestComment(
+            @MCPParam(name = "workspace", description = "The GitHub owner/organization name", required = true, example = "IstiN")
+            String workspace,
+            @MCPParam(name = "repository", description = "The GitHub repository name", required = true, example = "dmtools")
+            String repository,
+            @MCPParam(name = "commentId", description = "The ID of the comment to delete", required = true, example = "123456789")
+            String commentId) throws IOException {
+        String path = path(String.format("repos/%s/%s/issues/comments/%s", workspace, repository, commentId));
+        GenericRequest deleteRequest = new GenericRequest(this, path);
+        delete(deleteRequest);
+    }
+
+    @MCPTool(
             name = "github_reply_to_pr_thread",
             description = "Reply to an existing inline code review comment thread in a GitHub pull request. Use the comment ID of the root comment (or any comment) in the thread as inReplyToId.",
             integration = "github",
@@ -686,6 +727,136 @@ public abstract class GitHub extends AbstractRestClient implements SourceCode, U
         String path = path(String.format("repos/%s/%s/commits/%s/check-runs", workspace, repository, commitSha));
         GenericRequest getRequest = new GenericRequest(this, path);
         return execute(getRequest);
+    }
+
+    @MCPTool(
+            name = "github_create_commit_status",
+            description = "Create a commit status (the colored dot in PR checks). Use state=pending when AI analysis starts, success/failure/error when complete. The 'context' field acts as the status name and must be unique per check.",
+            integration = "github",
+            category = "pull_requests"
+    )
+    public String createCommitStatus(
+            @MCPParam(name = "workspace", description = "The GitHub owner/organization name", required = true, example = "IstiN")
+            String workspace,
+            @MCPParam(name = "repository", description = "The GitHub repository name", required = true, example = "dmtools")
+            String repository,
+            @MCPParam(name = "sha", description = "The commit SHA to set status on", required = true, example = "abc123def456...")
+            String sha,
+            @MCPParam(name = "state", description = "The state: pending | success | failure | error", required = true, example = "pending")
+            String state,
+            @MCPParam(name = "description", description = "Short human-readable description shown next to the status dot", required = false, example = "AI analysis in progress...")
+            String description,
+            @MCPParam(name = "context", description = "Unique identifier for this status check, e.g. 'dmtools/pr-review'", required = false, example = "dmtools/pr-review")
+            String context,
+            @MCPParam(name = "targetUrl", description = "Optional URL to link from the status (e.g. CI run URL)", required = false, example = "https://github.com/owner/repo/actions/runs/123")
+            String targetUrl) throws IOException {
+        String path = path(String.format("repos/%s/%s/statuses/%s", workspace, repository, sha));
+        GenericRequest postRequest = new GenericRequest(this, path);
+        JSONObject body = new JSONObject();
+        body.put("state", state);
+        if (description != null && !description.trim().isEmpty()) {
+            body.put("description", description);
+        }
+        if (context != null && !context.trim().isEmpty()) {
+            body.put("context", context);
+        }
+        if (targetUrl != null && !targetUrl.trim().isEmpty()) {
+            body.put("target_url", targetUrl);
+        }
+        postRequest.setBody(body.toString());
+        return post(postRequest);
+    }
+
+    @MCPTool(
+            name = "github_create_check_run",
+            description = "Create a GitHub Check Run — a rich CI check with progress, annotations, and a full log visible in the PR 'Checks' tab. Use status=in_progress when starting, then call github_update_check_run to complete it.",
+            integration = "github",
+            category = "pull_requests"
+    )
+    public String createCheckRun(
+            @MCPParam(name = "workspace", description = "The GitHub owner/organization name", required = true, example = "IstiN")
+            String workspace,
+            @MCPParam(name = "repository", description = "The GitHub repository name", required = true, example = "dmtools")
+            String repository,
+            @MCPParam(name = "name", description = "The name of the check run displayed in the PR", required = true, example = "dmtools / pr-review")
+            String name,
+            @MCPParam(name = "headSha", description = "The SHA of the commit to associate this check run with", required = true, example = "abc123def456...")
+            String headSha,
+            @MCPParam(name = "status", description = "The status: queued | in_progress | completed", required = false, example = "in_progress")
+            String status,
+            @MCPParam(name = "title", description = "Title shown in the check run output panel", required = false, example = "AI PR Review")
+            String title,
+            @MCPParam(name = "summary", description = "Markdown summary shown in the check run output panel", required = false, example = "🔍 Analysis started...")
+            String summary,
+            @MCPParam(name = "text", description = "Additional details in Markdown (supports large content)", required = false, example = "Full analysis results here...")
+            String text,
+            @MCPParam(name = "externalId", description = "Optional external identifier for this check run", required = false, example = "MAPC-6653")
+            String externalId) throws IOException {
+        String path = path(String.format("repos/%s/%s/check-runs", workspace, repository));
+        GenericRequest postRequest = new GenericRequest(this, path);
+        JSONObject body = new JSONObject();
+        body.put("name", name);
+        body.put("head_sha", headSha);
+        if (status != null && !status.trim().isEmpty()) {
+            body.put("status", status);
+        }
+        if (externalId != null && !externalId.trim().isEmpty()) {
+            body.put("external_id", externalId);
+        }
+        if (title != null || summary != null) {
+            JSONObject output = new JSONObject();
+            output.put("title", title != null ? title : name);
+            output.put("summary", summary != null ? summary : "");
+            if (text != null && !text.trim().isEmpty()) {
+                output.put("text", text);
+            }
+            body.put("output", output);
+        }
+        postRequest.setBody(body.toString());
+        return post(postRequest);
+    }
+
+    @MCPTool(
+            name = "github_update_check_run",
+            description = "Update an existing GitHub Check Run — set it to completed with success/failure conclusion, update summary and detailed text. Call this after github_create_check_run to finalize the check.",
+            integration = "github",
+            category = "pull_requests"
+    )
+    public String updateCheckRun(
+            @MCPParam(name = "workspace", description = "The GitHub owner/organization name", required = true, example = "IstiN")
+            String workspace,
+            @MCPParam(name = "repository", description = "The GitHub repository name", required = true, example = "dmtools")
+            String repository,
+            @MCPParam(name = "checkRunId", description = "The ID of the check run to update (from github_create_check_run response)", required = true, example = "1234567890")
+            String checkRunId,
+            @MCPParam(name = "status", description = "The new status: in_progress | completed", required = true, example = "completed")
+            String status,
+            @MCPParam(name = "conclusion", description = "Required when status=completed: success | failure | neutral | cancelled | skipped | timed_out | action_required", required = false, example = "success")
+            String conclusion,
+            @MCPParam(name = "title", description = "Updated title for the check run output panel", required = false, example = "AI PR Review — Complete")
+            String title,
+            @MCPParam(name = "summary", description = "Updated Markdown summary for the check run output panel", required = false, example = "✅ Review complete. Found 3 issues.")
+            String summary,
+            @MCPParam(name = "text", description = "Updated detailed Markdown content (full analysis, annotations etc.)", required = false, example = "## Issues Found\n...")
+            String text) throws IOException {
+        String path = path(String.format("repos/%s/%s/check-runs/%s", workspace, repository, checkRunId));
+        GenericRequest patchRequest = new GenericRequest(this, path);
+        JSONObject body = new JSONObject();
+        body.put("status", status);
+        if (conclusion != null && !conclusion.trim().isEmpty()) {
+            body.put("conclusion", conclusion);
+        }
+        if (title != null || summary != null) {
+            JSONObject output = new JSONObject();
+            if (title != null) output.put("title", title);
+            if (summary != null) output.put("summary", summary);
+            if (text != null && !text.trim().isEmpty()) {
+                output.put("text", text);
+            }
+            body.put("output", output);
+        }
+        patchRequest.setBody(body.toString());
+        return patch(patchRequest);
     }
 
     @MCPTool(
