@@ -130,11 +130,12 @@ public class IssuesIDsParser {
     }
 
     public static Set<String> extractConfluenceUrls(String basePath, String text) {
-        if (text == null || text.isEmpty()) {
+        if (basePath == null || basePath.isEmpty() || text == null || text.isEmpty()) {
             return Collections.emptySet();
         }
-        // Get the domain part (remove /wiki from basePath)
-        String domain = basePath.substring(0, basePath.lastIndexOf("/wiki"));
+        // Get the domain part (remove /wiki from basePath if present)
+        int wikiIndex = basePath.lastIndexOf("/wiki");
+        String domain = wikiIndex >= 0 ? basePath.substring(0, wikiIndex) : basePath;
 
         // Escape dots and other special characters in the domain for regex
         String escapedDomain = domain.replace(".", "\\.");
