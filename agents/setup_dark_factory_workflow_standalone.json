@@ -1,0 +1,9 @@
+{
+  "name": "jsrunner",
+  "params": {
+    "jsPath": "agents/js/setupDarkFactoryWorkflowStandalone.js",
+    "jobParams": {
+      "targetProjectKey": "TP"
+    }
+  }
+}

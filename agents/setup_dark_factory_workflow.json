@@ -1,0 +1,10 @@
+{
+  "name": "jsrunner",
+  "params": {
+    "jsPath": "agents/js/setupDarkFactoryWorkflow.js",
+    "jobParams": {
+      "targetProjectKey": "TP",
+      "sourceProjectKey": "MYTUBE"
+    }
+  }
+}

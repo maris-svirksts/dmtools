@@ -10,11 +10,11 @@
 
 **Images and Attachments:**
 - ADO does NOT support Jira wiki syntax like `!image.png!` — never use it
-- If the original description or attachments contain an image file (e.g. `image.png`), reference it as:
-  `<p><img src="image.png" alt="image.png" /></p>`
-- If the image cannot be embedded, add a References section at the end:
-  `<p><b>References:</b> See attached file: <em>image.png</em></p>`
-- Never silently drop image or attachment references
+- ADO images are stored as full-URL `<img>` tags with a unique GUID — you MUST copy the entire tag verbatim from the original description, e.g.:
+  `<img src="https://dev.azure.com/{org}/{projectId}/_apis/wit/attachments/{guid}?fileName=image.png" alt="description">`
+- The GUID in the URL cannot be reconstructed — if you drop the tag, the image is permanently lost
+- Place preserved `<img>` tags inside `<p>` tags, e.g. in a References section at the end:
+  `<p><strong>References:</strong></p><p><img src="https://dev.azure.com/..." alt="UI Design Reference"></p>`
 
 **Links:**
 - Use standard HTML anchor tags: `<a href="URL">Label</a>`
