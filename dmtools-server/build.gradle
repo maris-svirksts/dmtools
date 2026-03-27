@@ -8,8 +8,8 @@ group = 'com.github.istin.dmtools'
 version = '0.0.1-SNAPSHOT'
 
 java {
-    sourceCompatibility = '23'
-    targetCompatibility = '23'
+    sourceCompatibility = '17'
+    targetCompatibility = '17'
 }
 
 repositories {
@@ -25,13 +25,11 @@ dependencies {
         exclude module: 'dmtools-v1.5.26-all'
     }
 
-    // GraalVM JS dependencies for JavaScript execution
+    // GraalVM JS (community edition - works on any JDK 17+)
     def graalvmVersion = '24.1.1'
-    implementation "org.graalvm.sdk:graal-sdk:${graalvmVersion}"
-    implementation "org.graalvm.js:js:${graalvmVersion}"
-    implementation "org.graalvm.js:js-scriptengine:${graalvmVersion}"
-    implementation "org.graalvm.truffle:truffle-api:${graalvmVersion}"
     implementation "org.graalvm.polyglot:polyglot:${graalvmVersion}"
+    implementation "org.graalvm.js:js-community:${graalvmVersion}"
+    implementation "org.graalvm.js:js-scriptengine:${graalvmVersion}"
     implementation('org.springframework.boot:spring-boot-starter-web') {
         exclude group: 'ch.qos.logback', module: 'logback-classic'
         exclude group: 'ch.qos.logback', module: 'logback-core'
