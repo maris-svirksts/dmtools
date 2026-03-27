@@ -1,0 +1,3 @@
+[submodule "dmtools-cli"]
+	path = dmtools-cli
+	url = git@github.com:IstiN/dmtools-cli.git

@@ -1,1 +1,8 @@
-include 'dmtools-core', 'dmtools-server', 'dmtools-automation', 'dmtools-mcp-annotations', 'dmtools-annotation-processor'
+// Core modules are sourced from the dmtools-cli submodule
+include 'dmtools-core', 'dmtools-mcp-annotations', 'dmtools-annotation-processor'
+project(':dmtools-core').projectDir = file('dmtools-cli/dmtools-core')
+project(':dmtools-mcp-annotations').projectDir = file('dmtools-cli/dmtools-mcp-annotations')
+project(':dmtools-annotation-processor').projectDir = file('dmtools-cli/dmtools-annotation-processor')
+
+// Server and automation modules live in this repo
+include 'dmtools-server', 'dmtools-automation'
